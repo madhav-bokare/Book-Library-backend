@@ -19,7 +19,7 @@ connectDB()
 // ===== Middleware =====
 app.use(
   cors({
-    origin: "https://book-library-zoty.vercel.app/",
+    origin: "https://book-library-zoty.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
