@@ -18,7 +18,7 @@ connectDB();
 // ===== CORS (optimized) =====
 app.use(
   cors({
-    origin: "http://localhost:5173", 
+    origin: "https://book-library-zoty.vercel.app", 
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -29,7 +29,7 @@ app.use("/api/book", router);
 
 // ===== Health Check (FAST ping) =====
 app.get("/", (req, res) => {
-  res.send("API is running 🚀");
+  res.send("API is running ");
 });
 
 // ===== Server Start =====
