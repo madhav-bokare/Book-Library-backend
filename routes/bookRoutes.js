@@ -6,14 +6,15 @@ const router = express.Router();
 // ===== POST: Add single or multiple books =====
 router.post("/", async (req, res) => {
   try {
-    // Agar array of books bheja gaya
+    // Multiple books
     if (Array.isArray(req.body)) {
       const books = req.body.map(b => ({
         ...b,
         category: b.category?.toLowerCase(),
         link: b.link,
-        price: b.link === "paid" ? b.price ?? 0 : 0, // Paid book ke liye price required, otherwise 0
+        price: b.link === "paid" ? b.price ?? 0 : 0,
       }));
+
       const savedBooks = await Book.insertMany(books);
       return res.status(201).json(savedBooks);
     }
@@ -39,71 +40,68 @@ router.post("/", async (req, res) => {
     });
 
     res.status(201).json(newBook);
-
   } catch (err) {
     console.error("CREATE Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ===== GET: All Books =====
+// ===== GET: All Books (FAST) =====
 router.get("/", async (req, res) => {
   try {
-    const books = await Book.find();
+    const books = await Book.find().lean();
     res.json(books);
   } catch (err) {
-    console.error("GET ALL Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ===== GET: By Category =====
+// ===== GET: By Category (FAST) =====
 router.get("/category/:category", async (req, res) => {
   try {
     const category = req.params.category.toLowerCase();
-    const books = await Book.find({ category });
+    const books = await Book.find({ category }).lean();
     res.json(books);
   } catch (err) {
-    console.error("GET BY CATEGORY Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ===== GET: By Title =====
+// ===== GET: By Title (FAST & SAFE) =====
 router.get("/title/:title", async (req, res) => {
   try {
     const title = decodeURIComponent(req.params.title).trim();
+
     const book = await Book.findOne({
-      title: { $regex: `^${title}$`, $options: "i" },
-    });
+      title: new RegExp(`^${title}$`, "i"),
+    }).lean();
+
     if (!book) return res.status(404).json({ error: "Book not found" });
     res.json(book);
   } catch (err) {
-    console.error("GET BY TITLE Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ===== GET: Free Books =====
+// ===== GET: Free Books (FAST) =====
 router.get("/free", async (req, res) => {
   try {
-    const books = await Book.find({ link: "free" });
+    const books = await Book.find({ link: "free" }).lean();
     res.json(books);
   } catch (err) {
-    console.error("GET FREE Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ===== GET: Paid Books (price included) =====
+// ===== GET: Paid Books (FAST) =====
 router.get("/paid", async (req, res) => {
   try {
-    const books = await Book.find({ link: "paid" }).select(
-      "title img category content link price"
-    );
+    const books = await Book.find({ link: "paid" })
+      .select("title img category content link price")
+      .lean();
+
     res.json(books);
   } catch (err) {
-    console.error("GET PAID Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -113,15 +111,22 @@ router.put("/:id", async (req, res) => {
   try {
     const updateData = { ...req.body };
 
-    if (updateData.link === "paid" && (updateData.price === undefined || updateData.price === null)) {
+    if (
+      updateData.link === "paid" &&
+      (updateData.price === undefined || updateData.price === null)
+    ) {
       return res.status(400).json({ error: "Price is required for paid books" });
     }
 
-    const updatedBook = await Book.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    const updatedBook = await Book.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    ).lean();
+
     if (!updatedBook) return res.status(404).json({ error: "Book not found" });
     res.json(updatedBook);
   } catch (err) {
-    console.error("UPDATE Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -129,11 +134,10 @@ router.put("/:id", async (req, res) => {
 // ===== DELETE: Remove Book =====
 router.delete("/:id", async (req, res) => {
   try {
-    const deletedBook = await Book.findByIdAndDelete(req.params.id);
+    const deletedBook = await Book.findByIdAndDelete(req.params.id).lean();
     if (!deletedBook) return res.status(404).json({ error: "Book not found" });
     res.json({ message: "Book deleted successfully" });
   } catch (err) {
-    console.error("DELETE Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
