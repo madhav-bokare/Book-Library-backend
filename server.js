@@ -1,48 +1,34 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import connectDB from "../MongoDB/connect.js";
-import bookRoutes from "../routes/bookRoutes.js";
+import connectDB from "./MongoDB/connect.js";
+import bookRoutes from "./routes/bookRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
-/* BODY */
+/* BODY PARSER */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* 🔥 CORS — IMPORTANT */
+/* CORS (ALLOW FRONTEND) */
 app.use(
   cors({
-    origin: "https://book-library-zoty.vercel.app",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
+    origin: "*",   // 🔥 TEMPORARY – testing के लिए
+    methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
-
-/* 🔥 PRE-FLIGHT FIX */
-app.options("*", cors());
 
 /* ROUTES */
 app.use("/api/book", bookRoutes);
 
-app.get("/", (_, res) => {
+/* HEALTH */
+app.get("/", (req, res) => {
   res.send("API running");
 });
 
-/* 🔥 SERVERLESS HANDLER */
-let isReady = false;
+/* DB CONNECT (SAFE) */
+connectDB();
 
-export default async function handler(req, res) {
-  try {
-    if (!isReady) {
-      await connectDB();
-      isReady = true;
-    }
-    return app(req, res);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server crashed" });
-  }
-}
+export default app;
