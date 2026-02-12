@@ -5,7 +5,7 @@ const BookSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
-      unique: true,   
+      unique: true,
       trim: true,
     },
 
@@ -42,7 +42,8 @@ const BookSchema = new mongoose.Schema(
   }
 );
 
-/* ===== PERFORMANCE INDEXES ===== */
+/* FAST INDEX */
 BookSchema.index({ category: 1, link: 1 });
 
-export default mongoose.model("Book", BookSchema);
+export default mongoose.models.Book ||
+  mongoose.model("Book", BookSchema);
