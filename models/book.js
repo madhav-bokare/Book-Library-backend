@@ -6,6 +6,7 @@ const BookSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      index: true,          
       trim: true,
     },
 
@@ -18,6 +19,7 @@ const BookSchema = new mongoose.Schema(
       type: String,
       required: true,
       lowercase: true,
+      index: true,          
     },
 
     content: {
@@ -27,8 +29,9 @@ const BookSchema = new mongoose.Schema(
 
     link: {
       type: String,
-      enum: ["free", "paid"],
       required: true,
+      enum: ["free", "paid"],
+      index: true,          
     },
 
     price: {
@@ -38,12 +41,11 @@ const BookSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    versionKey: false,
+    versionKey: false,  
   }
 );
 
-/* FAST INDEX */
 BookSchema.index({ category: 1, link: 1 });
 
-export default mongoose.models.Book ||
-  mongoose.model("Book", BookSchema);
+const Book = mongoose.model("Book", BookSchema);
+export default Book;
