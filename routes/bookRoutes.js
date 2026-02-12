@@ -1,9 +1,9 @@
 import express from "express";
-import Book from "../models/book.js";
+import Book from "../models/Book.js";
 
 const router = express.Router();
 
-/* ===== CREATE ===== */
+/* CREATE */
 router.post("/", async (req, res) => {
   try {
     if (Array.isArray(req.body)) {
@@ -42,25 +42,21 @@ router.post("/", async (req, res) => {
   }
 });
 
-/* ===== ALL BOOKS ===== */
+/* READ */
 router.get("/", async (_, res) => {
-  const books = await Book.find().lean();
-  res.json(books);
+  res.json(await Book.find().lean());
 });
 
-/* ===== CATEGORY ===== */
 router.get("/category/:category", async (req, res) => {
-  const books = await Book.find({
-    category: req.params.category.toLowerCase(),
-  }).lean();
-
-  res.json(books);
+  res.json(
+    await Book.find({
+      category: req.params.category.toLowerCase(),
+    }).lean()
+  );
 });
 
-/* ===== TITLE ===== */
 router.get("/title/:title", async (req, res) => {
   const title = decodeURIComponent(req.params.title).trim();
-
   const book = await Book.findOne({
     title: new RegExp(`^${title}$`, "i"),
   }).lean();
@@ -69,22 +65,19 @@ router.get("/title/:title", async (req, res) => {
   res.json(book);
 });
 
-/* ===== FREE ===== */
 router.get("/free", async (_, res) => {
-  const books = await Book.find({ link: "free" }).lean();
-  res.json(books);
+  res.json(await Book.find({ link: "free" }).lean());
 });
 
-/* ===== PAID ===== */
 router.get("/paid", async (_, res) => {
-  const books = await Book.find({ link: "paid" })
-    .select("title img category content link price")
-    .lean();
-
-  res.json(books);
+  res.json(
+    await Book.find({ link: "paid" })
+      .select("title img category content link price")
+      .lean()
+  );
 });
 
-/* ===== UPDATE ===== */
+/* UPDATE */
 router.put("/:id", async (req, res) => {
   if (req.body.link === "paid" && req.body.price == null) {
     return res.status(400).json({ error: "Price required" });
@@ -100,7 +93,7 @@ router.put("/:id", async (req, res) => {
   res.json(book);
 });
 
-/* ===== DELETE ===== */
+/* DELETE */
 router.delete("/:id", async (req, res) => {
   const book = await Book.findByIdAndDelete(req.params.id).lean();
   if (!book) return res.status(404).json({ error: "Book not found" });
