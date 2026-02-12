@@ -5,11 +5,14 @@ const BookSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
-      unique: true,  
+      unique: true,   
       trim: true,
     },
 
-    img: { type: String, required: true },
+    img: {
+      type: String,
+      required: true,
+    },
 
     category: {
       type: String,
@@ -17,7 +20,10 @@ const BookSchema = new mongoose.Schema(
       lowercase: true,
     },
 
-    content: { type: String, required: true },
+    content: {
+      type: String,
+      required: true,
+    },
 
     link: {
       type: String,
@@ -25,12 +31,18 @@ const BookSchema = new mongoose.Schema(
       required: true,
     },
 
-    price: { type: Number,
-      default: 0 },
+    price: {
+      type: Number,
+      default: 0,
+    },
   },
-  { timestamps: true, versionKey: false }
+  {
+    timestamps: true,
+    versionKey: false,
+  }
 );
 
+/* ===== PERFORMANCE INDEXES ===== */
 BookSchema.index({ category: 1, link: 1 });
 
 export default mongoose.model("Book", BookSchema);
