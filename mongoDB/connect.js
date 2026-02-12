@@ -6,18 +6,13 @@ if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
-const connectDB = async () => {
+export default async function connectDB() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(process.env.MONGODB_URI, {
-      bufferCommands: false,
-    }).then((mongoose) => mongoose);
+    cached.promise = mongoose.connect(process.env.MONGODB_URI).then((m) => m);
   }
 
   cached.conn = await cached.promise;
-  console.log("✅ MongoDB Connected");
   return cached.conn;
-};
-
-export default connectDB;
+}
