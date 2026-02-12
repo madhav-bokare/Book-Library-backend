@@ -11,14 +11,28 @@ const app = express();
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ limit: "5mb", extended: true }));
 
-/* ===== CORS (FAST) ===== */
+/* ===== CORS (VERCEL SAFE) ===== */
+const allowedOrigins = [
+  "https://book-library-zoty.vercel.app"
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "https://book-library-zoty.vercel.app",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
+
+/* ===== IMPORTANT: PREFLIGHT FIX ===== */
+app.options("*", cors());
 
 /* ===== ROUTES ===== */
 app.use("/api/book", router);
@@ -28,11 +42,11 @@ app.get("/", (req, res) => {
   res.status(200).send("API is running ");
 });
 
-/* ===== SERVER START AFTER DB CONNECT ===== */
+/* ===== SERVER START ===== */
 const PORT = process.env.LOGIN_PORT || 5000;
 
 const startServer = async () => {
-  await connectDB(); 
+  await connectDB();
   app.listen(PORT, () => {
     console.log(` Server running on port ${PORT}`);
   });
