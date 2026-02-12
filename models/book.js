@@ -6,32 +6,46 @@ const BookSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      index: true,          
       trim: true,
     },
 
-    img: { type: String, required: true },
+    img: {
+      type: String,
+      required: true,
+    },
 
     category: {
       type: String,
       required: true,
       lowercase: true,
+      index: true,          
     },
 
-    content: { type: String, required: true },
-
-    link: {
+    content: {
       type: String,
-      enum: ["free", "paid"],
       required: true,
     },
 
-    price: { type: Number, default: 0 },
+    link: {
+      type: String,
+      required: true,
+      enum: ["free", "paid"],
+      index: true,          
+    },
+
+    price: {
+      type: Number,
+      default: 0,
+    },
   },
-  { timestamps: true, versionKey: false }
+  {
+    timestamps: true,
+    versionKey: false,  
+  }
 );
 
-// ✅ Only ONE compound index
 BookSchema.index({ category: 1, link: 1 });
 
-export default mongoose.model("Book", BookSchema);
-
+const Book = mongoose.model("Book", BookSchema);
+export default Book;
