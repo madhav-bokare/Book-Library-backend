@@ -11,7 +11,6 @@ const app = express();
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-/* CORS */
 app.use(
   cors({
     origin: "https://book-library-zoty.vercel.app",
@@ -19,21 +18,11 @@ app.use(
   })
 );
 
-/* MongoDB connect per request  */
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (err) {
-    console.error("DB error:", err);
-    res.status(500).json({ message: "Database connection failed" });
-  }
-});
+//  DB connect ONCE
+connectDB();
 
-/* Routes */
 app.use("/api/book", bookRoutes);
 
-/* Health check */
 app.get("/", (req, res) => {
   res.json({ status: "Backend OK" });
 });
