@@ -2,39 +2,40 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./MongoDB/connect.js";
-import router from "./routes/bookRoutes.js";
+import bookRoutes from "./routes/bookRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
-// ===== JSON & URL-encoded body =====
 app.use(express.json({ limit: "20mb" }));
-app.use(express.urlencoded({ limit: "20mb", extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
-// ===== MongoDB Connect (single time) =====
-connectDB();
-
-// ===== CORS (optimized) =====
+/* CORS */
 app.use(
   cors({
-    origin: "https://book-library-zoty.vercel.app", 
+    origin: "https://book-library-zoty.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
   })
 );
 
-// ===== Routes =====
-app.use("/api/book", router);
+/* MongoDB connect per request  */
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("DB error:", err);
+    res.status(500).json({ message: "Database connection failed" });
+  }
+});
 
-// ===== Health Check (FAST ping) =====
+/* Routes */
+app.use("/api/book", bookRoutes);
+
+/* Health check */
 app.get("/", (req, res) => {
-  res.send("API is running ");
+  res.json({ status: "Backend OK" });
 });
 
-// ===== Server Start =====
-const PORT = process.env.LOGIN_PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(` Server running on http://localhost:${PORT}`);
-});
+export default app;
