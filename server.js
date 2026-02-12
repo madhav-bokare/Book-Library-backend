@@ -8,27 +8,21 @@ dotenv.config();
 
 const app = express();
 
-/* BODY PARSER */
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-/* CORS (ALLOW FRONTEND) */
 app.use(
   cors({
-    origin: "*",   // 🔥 TEMPORARY – testing के लिए
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: "*", // 🔥 TESTING के लिए (CORS NOT ISSUE)
   })
 );
 
-/* ROUTES */
 app.use("/api/book", bookRoutes);
 
-/* HEALTH */
-app.get("/", (req, res) => {
-  res.send("API running");
+app.get("/", (_, res) => {
+  res.send("API OK");
 });
 
-/* DB CONNECT (SAFE) */
-connectDB();
+/* VERY IMPORTANT */
+await connectDB();
 
 export default app;
