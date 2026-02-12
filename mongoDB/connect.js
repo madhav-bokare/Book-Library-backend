@@ -11,12 +11,12 @@ const connectDB = async () => {
 
   if (!cached.promise) {
     cached.promise = mongoose.connect(process.env.MONGODB_URI, {
-      maxPoolSize: 10,
-    });
+      bufferCommands: false,
+    }).then((mongoose) => mongoose);
   }
 
   cached.conn = await cached.promise;
-  console.log("MongoDB Connected");
+  console.log("✅ MongoDB Connected");
   return cached.conn;
 };
 
